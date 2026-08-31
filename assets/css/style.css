@@ -1,0 +1,364 @@
+/* =====================================================
+   CATHOLIPRO
+   Identité visuelle catholique
+   ===================================================== */
+
+:root {
+    --bordeaux: #7a1f2b;
+    --bordeaux-fonce: #5a1520;
+    --or: #c9a227;
+    --or-clair: #e4c866;
+
+    --ivoire: #faf8f2;
+    --blanc: #ffffff;
+
+    --texte: #292929;
+    --texte-secondaire: #6b6b6b;
+
+    --bordure: #e4dfd2;
+
+    --vert-succes: #2e7d32;
+    --rouge-erreur: #b42318;
+}
+
+/* =====================================================
+   RESET
+   ===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    background-color: var(--ivoire);
+    color: var(--texte);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+/* =====================================================
+   CONTENEUR
+   ===================================================== */
+
+.conteneur {
+    width: min(1100px, 92%);
+    margin: 0 auto;
+}
+
+/* =====================================================
+   LOGO
+   ===================================================== */
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-croix {
+    color: var(--or);
+    font-size: 30px;
+    line-height: 1;
+}
+
+.logo-texte {
+    color: var(--bordeaux);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* =====================================================
+   BOUTONS
+   ===================================================== */
+
+.bouton {
+    display: inline-block;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.bouton-principal {
+    background-color: var(--bordeaux);
+    color: var(--blanc);
+}
+
+.bouton-principal:hover {
+    background-color: var(--bordeaux-fonce);
+    transform: translateY(-1px);
+}
+
+.bouton-or {
+    background-color: var(--or);
+    color: var(--blanc);
+}
+
+.bouton-or:hover {
+    background-color: #b28d1d;
+}
+
+/* =====================================================
+   FORMULAIRES
+   ===================================================== */
+
+.formulaire-groupe {
+    margin-bottom: 18px;
+}
+
+.formulaire-groupe label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 600;
+}
+
+.formulaire-groupe input,
+.formulaire-groupe select,
+.formulaire-groupe textarea {
+    width: 100%;
+    padding: 12px 14px;
+
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+
+    background-color: var(--blanc);
+    color: var(--texte);
+
+    outline: none;
+
+    transition: all 0.2s ease;
+}
+
+.formulaire-groupe input:focus,
+.formulaire-groupe select:focus,
+.formulaire-groupe textarea:focus {
+    border-color: var(--or);
+
+    box-shadow:
+        0 0 0 3px rgba(201, 162, 39, 0.15);
+}
+
+/* =====================================================
+   CARTES
+   ===================================================== */
+
+.carte {
+    background-color: var(--blanc);
+
+    border: 1px solid var(--bordure);
+
+    border-radius: 12px;
+
+    padding: 30px;
+
+    box-shadow:
+        0 8px 25px rgba(90, 21, 32, 0.06);
+}
+
+/* =====================================================
+   MESSAGES
+   ===================================================== */
+
+.message-erreur {
+    padding: 12px 15px;
+
+    margin-bottom: 20px;
+
+    border-left: 4px solid var(--rouge-erreur);
+
+    border-radius: 6px;
+
+    background-color: #fdf0ef;
+
+    color: var(--rouge-erreur);
+}
+
+.message-succes {
+    padding: 12px 15px;
+
+    margin-bottom: 20px;
+
+    border-left: 4px solid var(--vert-succes);
+
+    border-radius: 6px;
+
+    background-color: #edf7ed;
+
+    color: var(--vert-succes);
+}
+
+/* =====================================================
+   AUTHENTIFICATION
+   ===================================================== */
+
+.authentification {
+    width: min(500px, 92%);
+
+    position: relative;
+    z-index: 1;
+}
+
+.page-authentification {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 0;
+
+    background-color: #f8f8f8;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.page-authentification::before {
+    content: "";
+
+    position: absolute;
+
+    width: 450px;
+    height: 450px;
+
+    background-color: rgba(122, 31, 43, 0.04);
+
+    border-radius: 50%;
+
+    top: -200px;
+    left: -150px;
+}
+
+.page-authentification::after {
+    content: "";
+
+    position: absolute;
+
+    width: 400px;
+    height: 400px;
+
+    background-color: rgba(201, 162, 39, 0.05);
+
+    border-radius: 50%;
+
+    bottom: -200px;
+    right: -150px;
+}
+
+/* =====================================================
+   LOGO AUTHENTIFICATION
+   ===================================================== */
+
+.authentification-logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.authentification-logo .croix {
+    display: block;
+
+    color: var(--or);
+
+    font-size: 36px;
+
+    margin-bottom: 5px;
+}
+
+.authentification-logo h1 {
+    color: var(--bordeaux);
+
+    font-size: 34px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+.authentification-logo p {
+    color: var(--texte-secondaire);
+
+    margin-top: 5px;
+}
+
+/* =====================================================
+   TITRES
+   ===================================================== */
+
+h1,
+h2,
+h3 {
+    color: var(--bordeaux);
+}
+
+h2 {
+    margin-bottom: 8px;
+}
+
+/* =====================================================
+   LIEN
+   ===================================================== */
+
+.lien {
+    color: var(--bordeaux);
+    font-weight: 600;
+}
+
+.lien:hover {
+    color: var(--or);
+}
+
+/* =====================================================
+   SEPARATEUR
+   ===================================================== */
+
+.separateur {
+    width: 60px;
+    height: 3px;
+
+    background-color: var(--or);
+
+    margin: 12px auto 20px;
+
+    border-radius: 10px;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .carte {
+        padding: 22px;
+    }
+
+    .authentification-logo h1 {
+        font-size: 28px;
+    }
+
+    .authentification-logo .croix {
+        font-size: 30px;
+    }
+
+}
