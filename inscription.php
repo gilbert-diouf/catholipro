@@ -318,7 +318,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             type="password"
                             id="confirmation_mot_de_passe"
                             name="confirmation_mot_de_passe"
-                            placeholder="Répétez votre mot de passe"
+                            placeholder="Confirmer votre mot de passe"
                             autocomplete="new-password"
                             required
                         >

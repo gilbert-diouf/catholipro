@@ -8,6 +8,7 @@
     --bordeaux-fonce: #5a1520;
     --or: #c9a227;
     --or-clair: #e4c866;
+    --or-fonce: #b28d1d;
 
     --ivoire: #faf8f2;
     --blanc: #ffffff;
@@ -116,7 +117,7 @@ textarea {
 }
 
 .bouton-or:hover {
-    background-color: #b28d1d;
+    background-color: var(--or-fonce);
 }
 
 /* =====================================================
@@ -228,7 +229,7 @@ textarea {
 
     padding: 40px 0;
 
-    background-color: #f8f8f8;
+    background-color: var(--ivoire);
 
     position: relative;
     overflow: hidden;
