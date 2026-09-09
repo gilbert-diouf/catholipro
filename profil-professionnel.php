@@ -1,656 +1,283 @@
 <?php
-
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
-
-require_once "config/database.php";
-
-
-/*
-|--------------------------------------------------------------------------
-| Récupérer l'identifiant du profil
-|--------------------------------------------------------------------------
-*/
-
-$profil_id = filter_input(
-    INPUT_GET,
-    "id",
-    FILTER_VALIDATE_INT
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| Vérifier l'identifiant
-|--------------------------------------------------------------------------
-*/
-
-if (!$profil_id) {
-
-    header("Location: professionnels.php");
-    exit;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Récupérer le professionnel
-|--------------------------------------------------------------------------
-*/
-
-$sql = "
-    SELECT
-        pp.id,
-        pp.utilisateur_id,
-        pp.description,
-        pp.specialites,
-        pp.annees_experience,
-        pp.adresse,
-        pp.whatsapp,
-        pp.disponibilite,
-        pp.statut_verification,
-
-        u.prenom,
-        u.nom,
-        u.email,
-        u.telephone,
-        u.photo_profil,
-
-        c.nom AS categorie_nom,
-        c.icone AS categorie_icone,
-
-        l.region,
-        l.departement,
-        l.ville,
-        l.quartier
-
-    FROM profils_professionnels pp
-
-    INNER JOIN utilisateurs u
-        ON u.id = pp.utilisateur_id
-
-    INNER JOIN categories c
-        ON c.id = pp.categorie_id
-
-    INNER JOIN localisations l
-        ON l.id = pp.localisation_id
-
-    WHERE pp.id = ?
-    AND pp.statut_verification = 'verifie'
-    AND u.statut = 'actif'
-
-    LIMIT 1
-";
-
-
-$stmt = $connexion->prepare($sql);
-$stmt->execute([$profil_id]);
-
-$professionnel = $stmt->fetch();
-
-
-/*
-|--------------------------------------------------------------------------
-| Vérifier que le professionnel existe
-|--------------------------------------------------------------------------
-*/
-
-if (!$professionnel) {
-
-    header("Location: professionnels.php");
-    exit;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Préparer le numéro WhatsApp
-|--------------------------------------------------------------------------
-*/
-
-$whatsapp = $professionnel["whatsapp"];
-
-$whatsapp_nettoye = preg_replace(
-    "/[^0-9+]/",
-    "",
-    $whatsapp
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| Préparer le message WhatsApp
-|--------------------------------------------------------------------------
-*/
-
-$message = urlencode(
-    "Bonjour " .
-    $professionnel["prenom"] .
-    ", je vous contacte via CatholiPro concernant vos services de " .
-    $professionnel["categorie_nom"] .
-    "."
-);
-
+ 
+    session_start();
+    
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
+    
+    require_once "app/Controllers/ProfilProfessionnelController.php";
+    
+    $profilProfessionnelController = new ProfilProfessionnelController();
+    
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Récupérer l'identifiant du profil
+    |--------------------------------------------------------------------------
+    */
+    
+    $profil_id = filter_input(
+        INPUT_GET,
+        "id",
+        FILTER_VALIDATE_INT
+    );
+    
+    if (!$profil_id) {
+        header("Location: professionnels.php");
+        exit;
+    }
+    
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Récupérer le professionnel
+    |--------------------------------------------------------------------------
+    */
+    
+    $professionnel = $profilProfessionnelController->obtenirDetail($profil_id);
+    
+    if (!$professionnel) {
+        header("Location: professionnels.php");
+        exit;
+    }
+ 
 ?>
-
+ 
 <!DOCTYPE html>
-
-<html lang="fr">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-
-        <?= htmlspecialchars(
-            $professionnel["prenom"]
-        ) ?>
-
-        <?= htmlspecialchars(
-            $professionnel["nom"]
-        ) ?>
-
-        | CatholiPro
-
-    </title>
-
-
-    <link
-        rel="stylesheet"
-        href="assets/css/style.css"
-    >
-
-</head>
-
-
-<body>
-
-
-<!-- =====================================================
-     IDENTITÉ CATHOLIPRO
-     ===================================================== -->
-
-<header>
-
-    <div class="authentification-logo">
-
-        <span class="croix">
-            ✝
-        </span>
-
-        <h1>
-            CatholiPro
-        </h1>
-
-        <div class="separateur"></div>
-
-        <p>
-            La foi au service des talents
-        </p>
-
-    </div>
-
-</header>
-
-
-
-<!-- =====================================================
-     PROFIL PROFESSIONNEL
-     ===================================================== -->
-
-<main>
-
-    <section class="conteneur">
-
-
-        <!-- Retour -->
-
-        <div
-            style="
-                padding-top: 30px;
-                margin-bottom: 20px;
-            "
-        >
-
-            <a
-                href="professionnels.php"
-                class="lien"
-            >
-                ← Retour aux professionnels
-            </a>
-
+  <html lang="fr">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= htmlspecialchars($professionnel->getPrenom()) ?> <?= htmlspecialchars($professionnel->getNom()) ?> | ProCatho</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body>
+  
+  <!-- ==========================================================
+      EN-TÊTE / NAVIGATION
+      ========================================================== -->
+  <header class="entete">
+    <nav class="nav container">
+      <a href="index.php" class="nav-logo">
+        <img src="assets/images/logo.jpeg" alt="Logo ProCatho">
+        ProCatho
+      </a>
+  
+      <ul class="nav-liens">
+        <li><a href="index.php">Accueil</a></li>
+        <li><a href="professionnels.php" class="actif">Trouver un artisan</a></li>
+        <li><a href="index.php#comment-ca-marche">Comment ça marche</a></li>
+        <li><a href="index.php#a-propos">À propos</a></li>
+      </ul>
+  
+      <div class="nav-actions">
+        <?php if (isset($_SESSION["utilisateur_id"])) : ?>
+          <a href="profil.php" class="btn btn-primaire">Mon espace</a>
+        <?php else : ?>
+          <a href="connexion.php" class="btn btn-primaire">Devenir Partenaire</a>
+        <?php endif; ?>
+      </div>
+    </nav>
+  </header>
+  
+  
+  <!-- ==========================================================
+      FIL D'ARIANE
+      ========================================================== -->
+  <div class="container fil-ariane">
+    <a href="index.php">Accueil</a> &gt;
+    <a href="professionnels.php">Trouver un artisan</a> &gt;
+    <strong><?= htmlspecialchars($professionnel->getPrenom()) ?> <?= htmlspecialchars($professionnel->getNom()) ?></strong>
+  </div>
+  
+  
+  <!-- ==========================================================
+      PROFIL PROFESSIONNEL
+      ========================================================== -->
+  <main>
+    <div class="container profil-grille">
+  
+      <!-- ================= Colonne gauche : contact ================= -->
+      <aside class="profil-carte-contact">
+  
+        <?php if (!empty($professionnel->getPhotoProfil())): ?>
+          <img
+            class="profil-photo"
+            src="<?= htmlspecialchars($professionnel->getPhotoProfil()) ?>"
+            alt="Photo de <?= htmlspecialchars($professionnel->getPrenom()) ?>"
+          >
+        <?php else: ?>
+          <div class="profil-photo-vide">👤</div>
+        <?php endif; ?>
+  
+        <div class="profil-contact-corps">
+  
+          <div class="profil-nom">
+            <?= htmlspecialchars($professionnel->getPrenom()) ?>
+            <?= htmlspecialchars($professionnel->getNom()) ?>
+            <span class="icone-verif-inline">✓</span>
+          </div>
+  
+          <div class="profil-metier">
+            <?php if (!empty($professionnel->getCategorieIcone())): ?>
+              <?= htmlspecialchars($professionnel->getCategorieIcone()) ?>
+            <?php endif; ?>
+            <?= htmlspecialchars($professionnel->getCategorieNom()) ?>
+          </div>
+  
+          <div class="profil-tags">
+            <span class="profil-tag">
+              📍 <?= htmlspecialchars($professionnel->getVille()) ?>
+            </span>
+            <span class="profil-tag">
+              ⭐ <?= $professionnel->getAnneesExperience() ?> an(s) d'exp.
+            </span>
+          </div>
+  
+          <div class="profil-boutons">
+            <?php if ($professionnel->getLienWhatsapp()): ?>
+              <a
+                href="<?= htmlspecialchars($professionnel->getLienWhatsapp()) ?>"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-whatsapp"
+              >
+                📱 Contacter sur WhatsApp
+              </a>
+            <?php endif; ?>
+  
+            <?php if (!empty($professionnel->getTelephone())): ?>
+              <a href="tel:<?= htmlspecialchars($professionnel->getTelephone()) ?>" class="btn btn-primaire">
+                📞 Appeler (<?= htmlspecialchars($professionnel->getTelephone()) ?>)
+              </a>
+            <?php endif; ?>
+          </div>
+  
         </div>
-
-
-
-        <!-- =================================================
-             CARTE PRINCIPALE
-             ================================================= -->
-
-        <div
-            class="carte"
-            style="
-                max-width: 850px;
-                margin: 0 auto 50px;
-            "
-        >
-
-
-            <!-- =================================================
-                 PHOTO
-                 ================================================= -->
-
-            <div
-                style="
-                    text-align: center;
-                    margin-bottom: 25px;
-                "
-            >
-
-                <?php if (
-                    !empty(
-                        $professionnel["photo_profil"]
-                    )
-                ): ?>
-
-                    <img
-                        src="<?= htmlspecialchars(
-                            $professionnel["photo_profil"]
-                        ) ?>"
-                        alt="Photo de <?= htmlspecialchars(
-                            $professionnel["prenom"]
-                        ) ?>"
-                        style="
-                            width: 150px;
-                            height: 150px;
-                            object-fit: cover;
-                            border-radius: 50%;
-                        "
-                    >
-
-                <?php else: ?>
-
-                    <div
-                        style="
-                            width: 150px;
-                            height: 150px;
-                            border-radius: 50%;
-                            margin: 0 auto;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 60px;
-                            background: #f1f1f1;
-                        "
-                    >
-
-                        👤
-
-                    </div>
-
-                <?php endif; ?>
-
+  
+        <div class="profil-gages">
+          <h4>Gages de confiance</h4>
+          <div class="gage-ligne">
+            <span class="icone-verif-inline">✓</span> Identité vérifiée
+          </div>
+          <div class="gage-ligne">
+            <span class="icone-verif-inline">✓</span> Membre ProCatho
+          </div>
+          <?php if (!empty($professionnel->getDisponibilite())): ?>
+            <div class="gage-ligne">
+              🟢 <?= htmlspecialchars($professionnel->getDisponibilite()) ?>
             </div>
-
-
-
-            <!-- =================================================
-                 IDENTITÉ
-                 ================================================= -->
-
-            <div
-                style="
-                    text-align: center;
-                "
-            >
-
-                <h2>
-
-                    <?= htmlspecialchars(
-                        $professionnel["prenom"]
-                    ) ?>
-
-                    <?= htmlspecialchars(
-                        $professionnel["nom"]
-                    ) ?>
-
-                    ✓
-
-                </h2>
-
-
-                <p
-                    style="
-                        font-size: 20px;
-                        font-weight: 600;
-                    "
-                >
-
-                    <?php if (
-                        !empty(
-                            $professionnel["categorie_icone"]
-                        )
-                    ): ?>
-
-                        <?= htmlspecialchars(
-                            $professionnel["categorie_icone"]
-                        ) ?>
-
-                    <?php endif; ?>
-
-
-                    <?= htmlspecialchars(
-                        $professionnel["categorie_nom"]
-                    ) ?>
-
-                </p>
-
-
-                <p>
-
-                    📍
-
-                    <?= htmlspecialchars(
-                        $professionnel["ville"]
-                    ) ?>
-
-
-                    <?php if (
-                        !empty(
-                            $professionnel["quartier"]
-                        )
-                    ): ?>
-
-                        -
-
-                        <?= htmlspecialchars(
-                            $professionnel["quartier"]
-                        ) ?>
-
-                    <?php endif; ?>
-
-                </p>
-
-
-                <p>
-
-                    ✓
-
-                    <strong>
-                        Professionnel vérifié
-                    </strong>
-
-                </p>
-
-            </div>
-
-
-
-            <hr style="margin: 30px 0;">
-
-
-
-            <!-- =================================================
-                 EXPÉRIENCE
-                 ================================================= -->
-
+          <?php endif; ?>
+        </div>
+  
+      </aside>
+  
+  
+      <!-- ================= Colonne droite : détails ================= -->
+      <div>
+  
+        <!-- À propos -->
+        <div class="profil-bloc">
+          <h3>À propos</h3>
+  
+          <?php if (!empty($professionnel->getDescription())): ?>
+            <p><?= nl2br(htmlspecialchars($professionnel->getDescription())) ?></p>
+          <?php else: ?>
+            <p>Ce professionnel n'a pas encore ajouté de description.</p>
+          <?php endif; ?>
+  
+          <div class="profil-stats">
             <div>
-
-                <h3>
-                    Expérience professionnelle
-                </h3>
-
-                <p>
-
-                    ⭐
-
-                    <strong>
-
-                        <?= (int)
-                            $professionnel[
-                                "annees_experience"
-                            ]
-                        ?>
-
-                        an(s)
-
-                    </strong>
-
-                    d'expérience
-
-                </p>
-
+              <strong><?= $professionnel->getAnneesExperience() ?>+</strong>
+              <span>Années exp.</span>
             </div>
-
-
-
-            <!-- =================================================
-                 DESCRIPTION
-                 ================================================= -->
-
-            <?php if (
-                !empty(
-                    $professionnel["description"]
-                )
-            ): ?>
-
-                <div style="margin-top: 30px;">
-
-                    <h3>
-                        À propos
-                    </h3>
-
-                    <p>
-
-                        <?= nl2br(
-                            htmlspecialchars(
-                                $professionnel[
-                                    "description"
-                                ]
-                            )
-                        ) ?>
-
-                    </p>
-
-                </div>
-
-            <?php endif; ?>
-
-
-
-            <!-- =================================================
-                 SPÉCIALITÉS
-                 ================================================= -->
-
-            <?php if (
-                !empty(
-                    $professionnel["specialites"]
-                )
-            ): ?>
-
-                <div style="margin-top: 30px;">
-
-                    <h3>
-                        Mes spécialités
-                    </h3>
-
-                    <p>
-
-                        <?= nl2br(
-                            htmlspecialchars(
-                                $professionnel[
-                                    "specialites"
-                                ]
-                            )
-                        ) ?>
-
-                    </p>
-
-                </div>
-
-            <?php endif; ?>
-
-
-
-            <!-- =================================================
-                 LOCALISATION
-                 ================================================= -->
-
-            <div style="margin-top: 30px;">
-
-                <h3>
-                    Zone d'activité
-                </h3>
-
-                <p>
-
-                    📍
-
-                    <?= htmlspecialchars(
-                        $professionnel["region"]
-                    ) ?>
-
-                    <?php if (
-                        !empty(
-                            $professionnel["departement"]
-                        )
-                    ): ?>
-
-                        — 
-
-                        <?= htmlspecialchars(
-                            $professionnel["departement"]
-                        ) ?>
-
-                    <?php endif; ?>
-
-                </p>
-
-                <p>
-
-                    <?= htmlspecialchars(
-                        $professionnel["ville"]
-                    ) ?>
-
-
-                    <?php if (
-                        !empty(
-                            $professionnel["quartier"]
-                        )
-                    ): ?>
-
-                        — 
-
-                        <?= htmlspecialchars(
-                            $professionnel["quartier"]
-                        ) ?>
-
-                    <?php endif; ?>
-
-                </p>
-
-
-                <?php if (
-                    !empty(
-                        $professionnel["adresse"]
-                    )
-                ): ?>
-
-                    <p>
-
-                        <?= htmlspecialchars(
-                            $professionnel["adresse"]
-                        ) ?>
-
-                    </p>
-
-                <?php endif; ?>
-
+            <div>
+              <strong>100%</strong>
+              <span>Garantie</span>
             </div>
-
-
-
-            <!-- =================================================
-                 DISPONIBILITÉ
-                 ================================================= -->
-
-            <?php if (
-                !empty(
-                    $professionnel["disponibilite"]
-                )
-            ): ?>
-
-                <div style="margin-top: 30px;">
-
-                    <h3>
-                        Disponibilité
-                    </h3>
-
-                    <p>
-
-                        🟢
-
-                        <?= htmlspecialchars(
-                            $professionnel[
-                                "disponibilite"
-                            ]
-                        ) ?>
-
-                    </p>
-
-                </div>
-
-            <?php endif; ?>
-
-
-
-            <!-- =================================================
-                 CONTACT
-                 ================================================= -->
-
-            <div
-                style="
-                    margin-top: 35px;
-                    text-align: center;
-                "
-            >
-
-                <?php if (!empty($whatsapp_nettoye)): ?>
-
-                    <a
-                        href="https://wa.me/<?= htmlspecialchars(
-                            ltrim(
-                                $whatsapp_nettoye,
-                                "+"
-                            )
-                        ) ?>?text=<?= $message ?>"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="bouton bouton-principal"
-                    >
-
-                        📱 Contacter sur WhatsApp
-
-                    </a>
-
-                <?php endif; ?>
-
+            <div>
+              <strong>✓</strong>
+              <span>Vérifié</span>
             </div>
-
-
+          </div>
         </div>
-
-    </section>
-
-</main>
-
-
-</body>
-
+  
+        <!-- Spécialités -->
+        <?php if (!empty($professionnel->getSpecialites())): ?>
+          <div class="profil-bloc">
+            <h3>Mes spécialités</h3>
+            <p><?= nl2br(htmlspecialchars($professionnel->getSpecialites())) ?></p>
+          </div>
+        <?php endif; ?>
+  
+        <!-- Zone d'activité -->
+        <div class="profil-bloc">
+          <h3>Zone d'activité</h3>
+          <p>
+            📍 <?= htmlspecialchars($professionnel->getRegion()) ?>
+            <?php if (!empty($professionnel->getDepartement())): ?>
+              — <?= htmlspecialchars($professionnel->getDepartement()) ?>
+            <?php endif; ?>
+          </p>
+          <p>
+            <?= htmlspecialchars($professionnel->getVille()) ?>
+            <?php if (!empty($professionnel->getQuartier())): ?>
+              — <?= htmlspecialchars($professionnel->getQuartier()) ?>
+            <?php endif; ?>
+          </p>
+          <?php if (!empty($professionnel->getAdresse())): ?>
+            <p><?= htmlspecialchars($professionnel->getAdresse()) ?></p>
+          <?php endif; ?>
+        </div>
+  
+      </div>
+  
+    </div>
+  </main>
+  
+  
+  <!-- ==========================================================
+      PIED DE PAGE
+      ========================================================== -->
+  <footer class="pied">
+    <div class="container pied-grille">
+      <div class="pied-col">
+        <div class="pied-logo">
+          <img src="assets/images/logo.jpeg" alt="Logo ProCatho">
+          ProCatho
+        </div>
+        <p>La foi au service des talents.</p>
+      </div>
+  
+      <div class="pied-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="index.php">Accueil</a></li>
+          <li><a href="professionnels.php">Artisans</a></li>
+          <li><a href="inscription.php">Devenir Partenaire</a></li>
+        </ul>
+      </div>
+  
+      <div class="pied-col">
+        <h4>Valeurs</h4>
+        <ul>
+          <li><a href="index.php#a-propos">Confiance Mutuelle</a></li>
+          <li><a href="index.php#a-propos">Prix Juste</a></li>
+          <li><a href="index.php#a-propos">Bienveillance</a></li>
+        </ul>
+      </div>
+  
+      <div class="pied-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:contact@procatho.sn">contact@procatho.sn</a></li>
+        </ul>
+      </div>
+    </div>
+  
+    <p class="pied-bas">&copy; <?php echo date("Y"); ?> ProCatho. Tous droits réservés.</p>
+  </footer>
+  
+  </body>
 </html>
+ 
