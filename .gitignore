@@ -1,6 +1,5 @@
 # Configuration locale
 .env
-config/database.php
 
 # Fichiers système
 .DS_Store
