@@ -119,5 +119,15 @@ class ProfilProfessionnelController
     {
         return $this->service->listerEnAttente();
     }
+
+    public function verifier(int $id): void
+    {
+        $this->service->verifier($id);
+    }
+ 
+    public function rejeter(int $id): void
+    {
+        $this->service->rejeter($id);
+    }
 }
  

@@ -359,5 +359,35 @@ class ProfilProfessionnelRepository
  
         return $resultats;
     }
+
+    /**
+     * Marque un profil comme vérifié, uniquement s'il était en attente.
+     */
+    public function marquerVerifie(int $id): void
+    {
+        $sql = "
+            UPDATE profils_professionnels
+            SET statut_verification = 'verifie'
+            WHERE id = ? AND statut_verification = 'en_attente'
+        ";
+ 
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$id]);
+    }
+ 
+    /**
+     * Marque un profil comme rejeté, uniquement s'il était en attente.
+     */
+    public function marquerRejete(int $id): void
+    {
+        $sql = "
+            UPDATE profils_professionnels
+            SET statut_verification = 'rejete'
+            WHERE id = ? AND statut_verification = 'en_attente'
+        ";
+ 
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$id]);
+    }
 }
  

@@ -58,22 +58,25 @@ class UtilisateurRepository{
         return $this->creerDepuisLigne($donnees);
     }
  
-    public function findAll(): array {
-        $sql = "SELECT * FROM utilisateurs";
+    public function save(Utilisateur $utilisateur): void
+    {
+        $sql = "INSERT INTO utilisateurs
+                (nom, prenom, email, telephone, mot_de_passe, role, statut)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+ 
         $stmt = $this->connexion->prepare($sql);
-        $stmt->execute();
  
-        $donnees = $stmt->fetchAll();
- 
-        $utilisateurs = [];
- 
-        foreach ($donnees as $donnee){
-            $utilisateurs[] = $this->creerDepuisLigne($donnee);
-        }
- 
-        return $utilisateurs;
+        $stmt->execute([
+            $utilisateur->getNom(),
+            $utilisateur->getPrenom(),
+            $utilisateur->getEmail(),
+            $utilisateur->getTelephone(),
+            $utilisateur->getMotDePasse(),
+            $utilisateur->getRole(),
+            $utilisateur->getStatut()
+        ]);
     }
-
+ 
     public function count(): int
     {
         $sql = "SELECT COUNT(*) AS total FROM utilisateurs";
@@ -92,23 +95,42 @@ class UtilisateurRepository{
         return (int) $stmt->fetch()["total"];
     }
  
-    public function save(Utilisateur $utilisateur): void
+    public function updateStatut(int $id, string $statut): void
     {
-        $sql = "INSERT INTO utilisateurs
-                (nom, prenom, email, telephone, mot_de_passe, role, statut)
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "UPDATE utilisateurs SET statut = ? WHERE id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$statut, $id]);
+    }
+ 
+    /**
+     * Liste tous les utilisateurs, avec filtre optionnel par rôle.
+     *
+     * @return Utilisateur[]
+     */
+    public function findAll(?string $role = null): array
+    {
+        $sql = "SELECT * FROM utilisateurs";
+        $params = [];
+ 
+        if ($role !== null) {
+            $sql .= " WHERE role = ?";
+            $params[] = $role;
+        }
+ 
+        $sql .= " ORDER BY date_creation DESC";
  
         $stmt = $this->connexion->prepare($sql);
+        $stmt->execute($params);
  
-        $stmt->execute([
-            $utilisateur->getNom(),
-            $utilisateur->getPrenom(),
-            $utilisateur->getEmail(),
-            $utilisateur->getTelephone(),
-            $utilisateur->getMotDePasse(),
-            $utilisateur->getRole(),
-            $utilisateur->getStatut()
-        ]);
+        $donnees = $stmt->fetchAll();
+ 
+        $utilisateurs = [];
+ 
+        foreach ($donnees as $donnee) {
+            $utilisateurs[] = $this->creerDepuisLigne($donnee);
+        }
+ 
+        return $utilisateurs;
     }
 }
  

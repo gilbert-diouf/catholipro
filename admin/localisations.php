@@ -5,7 +5,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
  
-require_once "../config/database.php";
+require_once "../app/Controllers/LocalisationController.php";
  
  
 /*
@@ -24,6 +24,7 @@ if (
     exit;
 }
  
+$controller = new LocalisationController();
  
 $erreur = "";
 $succes = "";
@@ -37,26 +38,12 @@ $succes = "";
  
 if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "ajouter") {
  
-    $region = trim($_POST["region"] ?? "");
-    $departement = trim($_POST["departement"] ?? "");
-    $ville = trim($_POST["ville"] ?? "");
-    $quartier = trim($_POST["quartier"] ?? "");
+    $resultat = $controller->ajouter($_POST);
  
-    if (empty($region) || empty($ville)) {
- 
-        $erreur = "La région et la ville sont obligatoires.";
- 
+    if ($resultat["succes"]) {
+        $succes = $resultat["message"];
     } else {
- 
-        $sql = "
-            INSERT INTO localisations (region, departement, ville, quartier)
-            VALUES (?, ?, ?, ?)
-        ";
- 
-        $stmt = $connexion->prepare($sql);
-        $stmt->execute([$region, $departement, $ville, $quartier]);
- 
-        $succes = "La localisation a été ajoutée avec succès.";
+        $erreur = $resultat["message"];
     }
 }
  
@@ -73,17 +60,12 @@ if (isset($_GET["action"], $_GET["id"]) && $_GET["action"] === "supprimer") {
  
     if ($localisation_id) {
  
-        try {
+        $resultat = $controller->supprimer($localisation_id);
  
-            $sql = "DELETE FROM localisations WHERE id = ?";
-            $stmt = $connexion->prepare($sql);
-            $stmt->execute([$localisation_id]);
- 
-            $succes = "La localisation a été supprimée.";
- 
-        } catch (PDOException $e) {
- 
-            $erreur = "Impossible de supprimer cette localisation : des professionnels y sont encore rattachés.";
+        if ($resultat["succes"]) {
+            $succes = $resultat["message"];
+        } else {
+            $erreur = $resultat["message"];
         }
     }
 }
@@ -95,14 +77,7 @@ if (isset($_GET["action"], $_GET["id"]) && $_GET["action"] === "supprimer") {
 |--------------------------------------------------------------------------
 */
  
-$sql = "
-    SELECT id, region, departement, ville, quartier
-    FROM localisations
-    ORDER BY region, ville, quartier
-";
-$stmt = $connexion->prepare($sql);
-$stmt->execute();
-$localisations = $stmt->fetchAll();
+$localisations = $controller->listerToutes();
  
 ?>
  
@@ -223,14 +198,14 @@ $localisations = $stmt->fetchAll();
  
               <tr>
  
-                <td><?= htmlspecialchars($localisation["region"]) ?></td>
-                <td><?= !empty($localisation["departement"]) ? htmlspecialchars($localisation["departement"]) : "—" ?></td>
-                <td class="ligne-utilisateur-nom"><?= htmlspecialchars($localisation["ville"]) ?></td>
-                <td><?= !empty($localisation["quartier"]) ? htmlspecialchars($localisation["quartier"]) : "—" ?></td>
+                <td><?= htmlspecialchars($localisation->getRegion()) ?></td>
+                <td><?= !empty($localisation->getDepartement()) ? htmlspecialchars($localisation->getDepartement()) : "—" ?></td>
+                <td class="ligne-utilisateur-nom"><?= htmlspecialchars($localisation->getVille()) ?></td>
+                <td><?= !empty($localisation->getQuartier()) ? htmlspecialchars($localisation->getQuartier()) : "—" ?></td>
  
                 <td>
                   <a
-                    href="localisations.php?action=supprimer&id=<?= (int) $localisation["id"] ?>"
+                    href="localisations.php?action=supprimer&id=<?= $localisation->getId() ?>"
                     class="action-supprimer"
                     onclick="return confirm('Supprimer définitivement cette localisation ?');"
                   >

@@ -103,5 +103,15 @@ class ProfilProfessionnelService
     {
         return $this->repository->findEnAttente();
     }
+
+    public function verifier(int $id): void
+    {
+        $this->repository->marquerVerifie($id);
+    }
+ 
+    public function rejeter(int $id): void
+    {
+        $this->repository->marquerRejete($id);
+    }
 }
  

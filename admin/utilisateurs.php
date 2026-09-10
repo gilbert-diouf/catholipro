@@ -5,7 +5,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
  
-require_once "../config/database.php";
+require_once "../app/Controllers/UtilisateurController.php";
  
  
 /*
@@ -24,6 +24,8 @@ if (
     exit;
 }
  
+$controller = new UtilisateurController();
+ 
  
 /*
 |--------------------------------------------------------------------------
@@ -33,8 +35,6 @@ if (
  
 $role_filtre = $_GET["role"] ?? "";
  
-$roles_valides = ["client", "professionnel", "administrateur"];
- 
  
 /*
 |--------------------------------------------------------------------------
@@ -42,35 +42,7 @@ $roles_valides = ["client", "professionnel", "administrateur"];
 |--------------------------------------------------------------------------
 */
  
-$sql = "
-    SELECT
-        id,
-        prenom,
-        nom,
-        email,
-        telephone,
-        role,
-        statut,
-        photo_profil,
-        date_creation
-    FROM utilisateurs
-";
- 
-$params = [];
- 
-if (in_array($role_filtre, $roles_valides, true)) {
- 
-    $sql .= " WHERE role = ? ";
- 
-    $params[] = $role_filtre;
-}
- 
-$sql .= " ORDER BY date_creation DESC ";
- 
-$stmt = $connexion->prepare($sql);
-$stmt->execute($params);
- 
-$utilisateurs = $stmt->fetchAll();
+$utilisateurs = $controller->lister($_GET);
  
  
 /*
@@ -79,10 +51,7 @@ $utilisateurs = $stmt->fetchAll();
 |--------------------------------------------------------------------------
 */
  
-$sql = "SELECT COUNT(*) AS total FROM utilisateurs";
-$stmt = $connexion->prepare($sql);
-$stmt->execute();
-$total_utilisateurs = $stmt->fetch()["total"];
+$total_utilisateurs = $controller->compterTous();
  
 ?>
  
@@ -137,7 +106,7 @@ $total_utilisateurs = $stmt->fetch()["total"];
         <h2>Utilisateurs</h2>
         <p>Gérez les comptes clients, professionnels et administrateurs.</p>
       </div>
-      <span class="admin-compteur"><?= (int) $total_utilisateurs ?> au total</span>
+      <span class="admin-compteur"><?= $total_utilisateurs ?> au total</span>
     </div>
  
  
@@ -179,7 +148,7 @@ $total_utilisateurs = $stmt->fetch()["total"];
               <?php
  
               $initiales = mb_strtoupper(
-                  mb_substr($utilisateur["prenom"], 0, 1) . mb_substr($utilisateur["nom"], 0, 1)
+                  mb_substr($utilisateur->getPrenom(), 0, 1) . mb_substr($utilisateur->getNom(), 0, 1)
               );
  
               ?>
@@ -189,11 +158,11 @@ $total_utilisateurs = $stmt->fetch()["total"];
                 <td>
                   <div class="ligne-utilisateur-identite">
  
-                    <?php if (!empty($utilisateur["photo_profil"])): ?>
+                    <?php if (!empty($utilisateur->getPhotoProfil())): ?>
                       <img
                         class="mini-avatar"
-                        src="<?= htmlspecialchars($utilisateur["photo_profil"]) ?>"
-                        alt="Photo de <?= htmlspecialchars($utilisateur["prenom"]) ?>"
+                        src="<?= htmlspecialchars($utilisateur->getPhotoProfil()) ?>"
+                        alt="Photo de <?= htmlspecialchars($utilisateur->getPrenom()) ?>"
                       >
                     <?php else: ?>
                       <div class="mini-avatar"><?= htmlspecialchars($initiales) ?></div>
@@ -201,11 +170,11 @@ $total_utilisateurs = $stmt->fetch()["total"];
  
                     <div>
                       <div class="ligne-utilisateur-nom">
-                        <?= htmlspecialchars($utilisateur["prenom"]) ?>
-                        <?= htmlspecialchars($utilisateur["nom"]) ?>
+                        <?= htmlspecialchars($utilisateur->getPrenom()) ?>
+                        <?= htmlspecialchars($utilisateur->getNom()) ?>
                       </div>
                       <div class="ligne-utilisateur-email">
-                        <?= htmlspecialchars($utilisateur["email"]) ?>
+                        <?= htmlspecialchars($utilisateur->getEmail()) ?>
                       </div>
                     </div>
  
@@ -213,38 +182,38 @@ $total_utilisateurs = $stmt->fetch()["total"];
                 </td>
  
                 <td>
-                  <?= !empty($utilisateur["telephone"])
-                      ? htmlspecialchars($utilisateur["telephone"])
+                  <?= !empty($utilisateur->getTelephone())
+                      ? htmlspecialchars($utilisateur->getTelephone())
                       : "—"
                   ?>
                 </td>
  
                 <td>
-                  <span class="badge-role role-<?= htmlspecialchars($utilisateur["role"]) ?>">
-                    <?= htmlspecialchars(ucfirst($utilisateur["role"])) ?>
+                  <span class="badge-role role-<?= htmlspecialchars($utilisateur->getRole()) ?>">
+                    <?= htmlspecialchars(ucfirst($utilisateur->getRole())) ?>
                   </span>
                 </td>
  
                 <td>
-                  <span class="badge-statut statut-<?= htmlspecialchars($utilisateur["statut"]) ?>">
-                    <?= htmlspecialchars(ucfirst($utilisateur["statut"])) ?>
+                  <span class="badge-statut statut-<?= htmlspecialchars($utilisateur->getStatut()) ?>">
+                    <?= htmlspecialchars(ucfirst($utilisateur->getStatut())) ?>
                   </span>
                 </td>
  
                 <td>
-                  <?= htmlspecialchars(date("d/m/Y", strtotime($utilisateur["date_creation"]))) ?>
+                  <?= htmlspecialchars(date("d/m/Y", strtotime($utilisateur->getDateCreation()))) ?>
                 </td>
  
                 <td>
  
-                  <?php if ((int) $utilisateur["id"] === (int) $_SESSION["utilisateur_id"]): ?>
+                  <?php if ($utilisateur->getId() === (int) $_SESSION["utilisateur_id"]): ?>
  
                     <span style="color: var(--gris-texte); font-size: 0.85rem;">—</span>
  
-                  <?php elseif ($utilisateur["statut"] === "actif"): ?>
+                  <?php elseif ($utilisateur->getStatut() === "actif"): ?>
  
                     <a
-                      href="basculer-statut.php?id=<?= (int) $utilisateur["id"] ?>"
+                      href="basculer-statut.php?id=<?= $utilisateur->getId() ?>"
                       class="action-suspendre"
                       onclick="return confirm('Suspendre ce compte ?');"
                     >
@@ -254,7 +223,7 @@ $total_utilisateurs = $stmt->fetch()["total"];
                   <?php else: ?>
  
                     <a
-                      href="basculer-statut.php?id=<?= (int) $utilisateur["id"] ?>"
+                      href="basculer-statut.php?id=<?= $utilisateur->getId() ?>"
                       class="action-activer"
                       onclick="return confirm('Réactiver ce compte ?');"
                     >

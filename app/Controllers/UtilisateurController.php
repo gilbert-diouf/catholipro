@@ -13,7 +13,7 @@ class UtilisateurController
  
     /**
      * Traite une demande d'inscription.
-     * Valide le format des champs ,
+     * Valide le format des champs (équivalent d'un @Valid sur un DTO),
      * puis délègue la règle métier au Service.
      *
      * @param array $donnees Les données brutes de $_POST
@@ -120,7 +120,7 @@ class UtilisateurController
     {
         return $this->service->obtenirParId($id);
     }
-
+ 
     public function compterTous(): int
     {
         return $this->service->compterTous();
@@ -129,6 +129,27 @@ class UtilisateurController
     public function compterParRole(string $role): int
     {
         return $this->service->compterParRole($role);
+    }
+ 
+    public function basculerStatut(int $utilisateurCibleId, int $utilisateurConnecteId): void
+    {
+        $this->service->basculerStatut($utilisateurCibleId, $utilisateurConnecteId);
+    }
+ 
+    /**
+     * Liste les utilisateurs, filtrés par rôle si le paramètre GET est valide.
+     * Un rôle absent ou invalide est traité comme "aucun filtre".
+     *
+     * @return Utilisateur[]
+     */
+    public function lister(array $filtres): array
+    {
+        $rolesValides = ["client", "professionnel", "administrateur"];
+        $role = $filtres["role"] ?? "";
+ 
+        $roleFiltre = in_array($role, $rolesValides, true) ? $role : null;
+ 
+        return $this->service->lister($roleFiltre);
     }
 }
  
