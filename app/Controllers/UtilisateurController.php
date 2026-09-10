@@ -120,5 +120,15 @@ class UtilisateurController
     {
         return $this->service->obtenirParId($id);
     }
+
+    public function compterTous(): int
+    {
+        return $this->service->compterTous();
+    }
+ 
+    public function compterParRole(string $role): int
+    {
+        return $this->service->compterParRole($role);
+    }
 }
  

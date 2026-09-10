@@ -73,6 +73,24 @@ class UtilisateurRepository{
  
         return $utilisateurs;
     }
+
+    public function count(): int
+    {
+        $sql = "SELECT COUNT(*) AS total FROM utilisateurs";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute();
+ 
+        return (int) $stmt->fetch()["total"];
+    }
+ 
+    public function countByRole(string $role): int
+    {
+        $sql = "SELECT COUNT(*) AS total FROM utilisateurs WHERE role = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$role]);
+ 
+        return (int) $stmt->fetch()["total"];
+    }
  
     public function save(Utilisateur $utilisateur): void
     {

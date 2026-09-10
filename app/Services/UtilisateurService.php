@@ -84,5 +84,15 @@
         {
             return $this->repository->findById($id);
         }
+
+        public function compterTous(): int
+        {
+            return $this->repository->count();
+        }
+    
+        public function compterParRole(string $role): int
+        {
+            return $this->repository->countByRole($role);
+        }
     }
 ?>
