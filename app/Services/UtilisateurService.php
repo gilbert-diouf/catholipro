@@ -128,5 +128,10 @@ class UtilisateurService
     {
         return $this->repository->findAll($role);
     }
+
+    public function mettreAJourPhoto(int $id, string $cheminPhoto): void
+    {
+        $this->repository->updatePhotoProfil($id, $cheminPhoto);
+    }
 }
  

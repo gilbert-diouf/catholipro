@@ -74,6 +74,19 @@ class ProfilProfessionnelService
  
         $profilExistant = $this->repository->findByUtilisateurId($utilisateurId);
  
+        /*
+        | Règle métier : si le profil avait été rejeté, une modification
+        | vaut resoumission et le repasse "en attente" de vérification.
+        | S'il était déjà vérifié ou en attente, son statut est conservé.
+        */
+        $statutVerification = "en_attente";
+ 
+        if ($profilExistant !== null) {
+            $statutVerification = $profilExistant->getStatutVerification() === "rejete"
+                ? "en_attente"
+                : $profilExistant->getStatutVerification();
+        }
+ 
         $profil = new ProfilProfessionnel(
             $profilExistant ? $profilExistant->getId() : 0,
             $utilisateurId,
@@ -85,7 +98,7 @@ class ProfilProfessionnelService
             $adresse,
             $whatsapp,
             $disponibilite,
-            $profilExistant ? $profilExistant->getStatutVerification() : "en_attente"
+            $statutVerification
         );
  
         return $this->repository->save($profil);
@@ -103,7 +116,7 @@ class ProfilProfessionnelService
     {
         return $this->repository->findEnAttente();
     }
-
+ 
     public function verifier(int $id): void
     {
         $this->repository->marquerVerifie($id);

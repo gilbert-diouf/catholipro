@@ -757,6 +757,7 @@ img {
   width: 100%;
   height: 220px;
   object-fit: cover;
+  object-position: top;
   background-color: var(--gris-clair);
 }
 
@@ -1158,6 +1159,43 @@ img {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.lien-photo {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--bleu-marine);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.lien-photo:hover {
+  color: var(--or);
+}
+
+.statut-profil-banniere {
+  padding: 14px 18px;
+  border-radius: var(--rayon);
+  margin-bottom: 22px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.statut-profil-banniere.statut-verifie {
+  background-color: #e8f5ea;
+  color: #2f8f4e;
+}
+
+.statut-profil-banniere.statut-attente {
+  background-color: #fff6e0;
+  color: #93720b;
+}
+
+.statut-profil-banniere.statut-rejete {
+  background-color: #fbe9e7;
+  color: #b3261e;
 }
 
 /* ---------- Formulaire large (mon-profil.php) ---------- */

@@ -151,5 +151,58 @@ class UtilisateurController
  
         return $this->service->lister($roleFiltre);
     }
+
+    /**
+     * Traite l'envoi d'une nouvelle photo de profil.
+     */
+    public function televerserPhoto(array $fichier, int $utilisateurId): array
+    {
+        $extensionsAutorisees = ["jpg", "jpeg", "png", "webp"];
+        $typesMimeAutorises = ["image/jpeg", "image/png", "image/webp"];
+        $tailleMaxOctets = 2 * 1024 * 1024; // 2 Mo
+ 
+        if (empty($fichier["name"]) || ($fichier["error"] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return ["succes" => false, "message" => "Veuillez sélectionner une image."];
+        }
+ 
+        if ($fichier["error"] !== UPLOAD_ERR_OK) {
+            return ["succes" => false, "message" => "Le téléversement a échoué, veuillez réessayer."];
+        }
+ 
+        if ($fichier["size"] > $tailleMaxOctets) {
+            return ["succes" => false, "message" => "L'image ne doit pas dépasser 2 Mo."];
+        }
+ 
+        $extension = strtolower(pathinfo($fichier["name"], PATHINFO_EXTENSION));
+ 
+        if (!in_array($extension, $extensionsAutorisees, true)) {
+            return ["succes" => false, "message" => "Formats acceptés : JPG, PNG, WEBP."];
+        }
+ 
+        // Vérification que le fichier est une image réellement décodable (pas seulement son extension déclarée)
+        $infosImage = @getimagesize($fichier["tmp_name"]);
+
+        if ($infosImage === false || !in_array($infosImage["mime"], $typesMimeAutorises, true)) {
+            return ["succes" => false, "message" => "Le fichier envoyé n'est pas une image valide."];
+        }
+        
+        $dossierDestination = __DIR__ . "/../../uploads/photos";
+ 
+        if (!is_dir($dossierDestination)) {
+            mkdir($dossierDestination, 0755, true);
+        }
+ 
+        $nomFichier = "utilisateur_" . $utilisateurId . "_" . uniqid() . "." . $extension;
+        $cheminAbsolu = $dossierDestination . "/" . $nomFichier;
+        $cheminRelatif = "uploads/photos/" . $nomFichier;
+ 
+        if (!move_uploaded_file($fichier["tmp_name"], $cheminAbsolu)) {
+            return ["succes" => false, "message" => "Impossible d'enregistrer l'image, veuillez réessayer."];
+        }
+ 
+        $this->service->mettreAJourPhoto($utilisateurId, $cheminRelatif);
+ 
+        return ["succes" => true, "message" => "Votre photo de profil a été mise à jour."];
+    }
 }
  

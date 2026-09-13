@@ -5,6 +5,7 @@
   ini_set('display_errors', '1');
 
   require_once "app/Controllers/UtilisateurController.php";
+  require_once "app/Security/Csrf.php";
 
   $controller = new UtilisateurController();
 
@@ -27,14 +28,21 @@
       $telephone = trim($_POST["telephone"] ?? "");
       $role = $_POST["role"] ?? "professionnel";
 
-      $resultat = $controller->inscrire($_POST);
+      if (!Csrf::verifier($_POST["csrf_token"] ?? null)) {
 
-      if ($resultat["succes"]) {
-          $succes = $resultat["message"];
-          // Réinitialisation du formulaire
-          $prenom = $nom = $email = $telephone = "";
+          $erreur = "Votre session a expiré, veuillez réessayer.";
+
       } else {
-          $erreur = $resultat["message"];
+
+          $resultat = $controller->inscrire($_POST);
+
+          if ($resultat["succes"]) {
+              $succes = $resultat["message"];
+              // Réinitialisation du formulaire
+              $prenom = $nom = $email = $telephone = "";
+          } else {
+              $erreur = $resultat["message"];
+          }
       }
   }
 ?>
@@ -81,6 +89,8 @@
         <?php endif; ?>
 
         <form method="POST" action="">
+  
+          <?= Csrf::champCache() ?>
 
           <!-- Prénom -->
           <div class="formulaire-groupe">
@@ -139,4 +149,3 @@
 
   </body>
 </html>
- 

@@ -208,7 +208,9 @@ class ProfilProfessionnelRepository
     /**
      * Crée ou met à jour un profil professionnel.
      * - id === 0  → création (INSERT)
-     * - id > 0    → modification (UPDATE)
+     * - id > 0    → modification (UPDATE), le statut de vérification
+     *               n'est jamais modifié ici (une modification ne doit
+     *               pas re-basculer un profil déjà vérifié)
      *
      * Retourne le profil persisté (avec son id, en cas de création).
      */
@@ -265,7 +267,8 @@ class ProfilProfessionnelRepository
                 specialites = ?,
                 adresse = ?,
                 whatsapp = ?,
-                disponibilite = ?
+                disponibilite = ?,
+                statut_verification = ?
             WHERE utilisateur_id = ?
         ";
  
@@ -280,6 +283,7 @@ class ProfilProfessionnelRepository
             $profil->getAdresse(),
             $profil->getWhatsapp(),
             $profil->getDisponibilite(),
+            $profil->getStatutVerification(),
             $profil->getUtilisateurId()
         ]);
  
@@ -297,6 +301,7 @@ class ProfilProfessionnelRepository
  
     /**
      * Liste tous les professionnels en attente de vérification, pour l'admin.
+     * Contrairement à rechercher(), ne filtre pas sur le statut du compte utilisateur.
      *
      * @return ProfilProfessionnelEnAttente[]
      */
@@ -359,9 +364,11 @@ class ProfilProfessionnelRepository
  
         return $resultats;
     }
-
+ 
     /**
      * Marque un profil comme vérifié, uniquement s'il était en attente.
+     * Ne fait rien (silencieusement) si le profil n'existe pas ou
+     * n'est plus en attente — comportement idempotent.
      */
     public function marquerVerifie(int $id): void
     {
@@ -390,4 +397,3 @@ class ProfilProfessionnelRepository
         $stmt->execute([$id]);
     }
 }
- 

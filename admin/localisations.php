@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
  
 require_once "../app/Controllers/LocalisationController.php";
+require_once "../app/Security/Csrf.php";
  
  
 /*
@@ -38,12 +39,19 @@ $succes = "";
  
 if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "ajouter") {
  
-    $resultat = $controller->ajouter($_POST);
+    if (!Csrf::verifier($_POST["csrf_token"] ?? null)) {
  
-    if ($resultat["succes"]) {
-        $succes = $resultat["message"];
+        $erreur = "Votre session a expiré, veuillez réessayer.";
+ 
     } else {
-        $erreur = $resultat["message"];
+ 
+        $resultat = $controller->ajouter($_POST);
+ 
+        if ($resultat["succes"]) {
+            $succes = $resultat["message"];
+        } else {
+            $erreur = $resultat["message"];
+        }
     }
 }
  
@@ -143,6 +151,7 @@ $localisations = $controller->listerToutes();
     <div class="admin-ajout-carte">
       <h3>Ajouter une localisation</h3>
       <form method="POST" class="admin-ajout-ligne">
+        <?= Csrf::champCache() ?>
         <input type="hidden" name="action" value="ajouter">
  
         <div class="admin-ajout-champ">
@@ -230,4 +239,3 @@ $localisations = $controller->listerToutes();
  
 </body>
 </html>
- 

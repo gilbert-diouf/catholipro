@@ -132,5 +132,12 @@ class UtilisateurRepository{
  
         return $utilisateurs;
     }
+
+    public function updatePhotoProfil(int $id, string $cheminPhoto): void
+    {
+        $sql = "UPDATE utilisateurs SET photo_profil = ? WHERE id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$cheminPhoto, $id]);
+    }
 }
  
