@@ -80,6 +80,7 @@ $professionnels = $profilProfessionnelController->listerEnAttente();
       <li><a href="utilisateurs.php"><span class="admin-nav-icone">👥</span> Utilisateurs</a></li>
       <li><a href="categories.php"><span class="admin-nav-icone">🏷️</span> Catégories</a></li>
       <li><a href="localisations.php"><span class="admin-nav-icone">📍</span> Localisations</a></li>
+      <li><a href="avis.php"><span class="admin-nav-icone">⭐</span> Avis</a></li>
     </ul>
  
     <div class="admin-sidebar-bas">

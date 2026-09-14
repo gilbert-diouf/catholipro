@@ -925,6 +925,96 @@ img {
 }
 
 /* ==========================================================================
+   AVIS CLIENTS — profil-professionnel.php
+   ========================================================================== */
+
+.avis-resume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--gris-clair);
+}
+
+.avis-resume-note {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--bleu-marine);
+}
+
+.avis-resume-etoiles {
+  font-size: 1rem;
+}
+
+.avis-resume-total {
+  color: var(--gris-texte);
+  font-size: 0.86rem;
+}
+
+.avis-liste {
+  margin-bottom: 22px;
+}
+
+.avis-carte {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gris-clair);
+}
+
+.avis-carte:last-child {
+  border-bottom: none;
+}
+
+.avis-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.avis-auteur {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.avis-date {
+  font-size: 0.78rem;
+  color: var(--gris-texte);
+}
+
+.avis-etoiles {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.avis-commentaire {
+  color: var(--gris-texte);
+  font-size: 0.9rem;
+}
+
+.avis-formulaire-bloc {
+  padding-top: 18px;
+  border-top: 1px solid var(--gris-clair);
+}
+
+.avis-formulaire-bloc h4 {
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+
+.avis-invite {
+  color: var(--gris-texte);
+  font-size: 0.92rem;
+}
+
+.avis-invite a {
+  color: var(--bleu-marine);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
    PAGES AUTHENTIFICATION — inscription.php / connexion.php
    ========================================================================== */
 
