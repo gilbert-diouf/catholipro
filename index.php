@@ -22,8 +22,8 @@ ini_set('display_errors', '1');
   <header class="entete">
     <nav class="nav container">
       <a href="index.php" class="nav-logo">
-        <img src="assets/images/logo.jpeg" alt="Logo ProCatho">
-        ProCatho
+        <img src="assets/images/logo.png" alt="Logo ChristianConnect">
+        ChristianConnect
       </a>
   
       <ul class="nav-liens">
@@ -219,8 +219,8 @@ ini_set('display_errors', '1');
     <div class="container pied-grille">
       <div class="pied-col">
         <div class="pied-logo">
-          <img src="assets/images/logo.jpeg" alt="Logo ProCatho">
-          ProCatho
+          <img src="assets/images/logo.png" alt="Logo ChristianConnect">
+          ChristianConnect
         </div>
         <p>La foi au service des talents.</p>
       </div>

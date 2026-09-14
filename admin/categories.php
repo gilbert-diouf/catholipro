@@ -62,12 +62,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "ajout
 |--------------------------------------------------------------------------
 */
  
-if (isset($_GET["action"], $_GET["id"]) && $_GET["action"] === "basculer") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "basculer") {
  
-    $categorie_id = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+    if (Csrf::verifier($_POST["csrf_token"] ?? null)) {
  
-    if ($categorie_id) {
-        $controller->basculerStatut($categorie_id);
+        $categorie_id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
+ 
+        if ($categorie_id) {
+            $controller->basculerStatut($categorie_id);
+        }
     }
  
     header("Location: categories.php");
@@ -81,18 +84,25 @@ if (isset($_GET["action"], $_GET["id"]) && $_GET["action"] === "basculer") {
 |--------------------------------------------------------------------------
 */
  
-if (isset($_GET["action"], $_GET["id"]) && $_GET["action"] === "supprimer") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "supprimer") {
  
-    $categorie_id = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+    if (!Csrf::verifier($_POST["csrf_token"] ?? null)) {
  
-    if ($categorie_id) {
+        $erreur = "Votre session a expiré, veuillez réessayer.";
  
-        $resultat = $controller->supprimer($categorie_id);
+    } else {
  
-        if ($resultat["succes"]) {
-            $succes = $resultat["message"];
-        } else {
-            $erreur = $resultat["message"];
+        $categorie_id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
+ 
+        if ($categorie_id) {
+ 
+            $resultat = $controller->supprimer($categorie_id);
+ 
+            if ($resultat["succes"]) {
+                $succes = $resultat["message"];
+            } else {
+                $erreur = $resultat["message"];
+            }
         }
     }
 }
@@ -230,20 +240,30 @@ $categories = $controller->listerToutes();
                 </td>
  
                 <td>
-                  <a
-                    href="categories.php?action=basculer&id=<?= $categorie->getId() ?>"
-                    class="<?= $categorie->getStatut() === "actif" ? "action-suspendre" : "action-activer" ?>"
-                  >
-                    <?= $categorie->getStatut() === "actif" ? "Désactiver" : "Activer" ?>
-                  </a>
+                  <form method="POST" action="categories.php" style="display: inline;">
+                    <?= Csrf::champCache() ?>
+                    <input type="hidden" name="action" value="basculer">
+                    <input type="hidden" name="id" value="<?= $categorie->getId() ?>">
+                    <button
+                      type="submit"
+                      class="bouton-texte <?= $categorie->getStatut() === "actif" ? "action-suspendre" : "action-activer" ?>"
+                    >
+                      <?= $categorie->getStatut() === "actif" ? "Désactiver" : "Activer" ?>
+                    </button>
+                  </form>
  
-                  <a
-                    href="categories.php?action=supprimer&id=<?= $categorie->getId() ?>"
-                    class="action-supprimer"
-                    onclick="return confirm('Supprimer définitivement ce métier ?');"
-                  >
-                    Supprimer
-                  </a>
+                  <form method="POST" action="categories.php" style="display: inline;">
+                    <?= Csrf::champCache() ?>
+                    <input type="hidden" name="action" value="supprimer">
+                    <input type="hidden" name="id" value="<?= $categorie->getId() ?>">
+                    <button
+                      type="submit"
+                      class="bouton-texte action-supprimer"
+                      onclick="return confirm('Supprimer définitivement ce métier ?');"
+                    >
+                      Supprimer
+                    </button>
+                  </form>
                 </td>
  
               </tr>

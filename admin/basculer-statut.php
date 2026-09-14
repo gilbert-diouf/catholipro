@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
  
 require_once "../app/Controllers/UtilisateurController.php";
+require_once "../app/Security/Csrf.php";
  
  
 /*
@@ -27,12 +28,24 @@ if (
  
 /*
 |--------------------------------------------------------------------------
+| Vérifier la méthode et le jeton CSRF
+|--------------------------------------------------------------------------
+*/
+ 
+if ($_SERVER["REQUEST_METHOD"] !== "POST" || !Csrf::verifier($_POST["csrf_token"] ?? null)) {
+    header("Location: utilisateurs.php");
+    exit;
+}
+ 
+ 
+/*
+|--------------------------------------------------------------------------
 | Récupérer l'identifiant de l'utilisateur
 |--------------------------------------------------------------------------
 */
  
 $utilisateur_id = filter_input(
-    INPUT_GET,
+    INPUT_POST,
     "id",
     FILTER_VALIDATE_INT
 );
@@ -61,4 +74,3 @@ $controller->basculerStatut($utilisateur_id, (int) $_SESSION["utilisateur_id"]);
  
 header("Location: utilisateurs.php");
 exit;
- 

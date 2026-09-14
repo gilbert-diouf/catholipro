@@ -62,18 +62,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "ajout
 |--------------------------------------------------------------------------
 */
  
-if (isset($_GET["action"], $_GET["id"]) && $_GET["action"] === "supprimer") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "supprimer") {
  
-    $localisation_id = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+    if (!Csrf::verifier($_POST["csrf_token"] ?? null)) {
  
-    if ($localisation_id) {
+        $erreur = "Votre session a expiré, veuillez réessayer.";
  
-        $resultat = $controller->supprimer($localisation_id);
+    } else {
  
-        if ($resultat["succes"]) {
-            $succes = $resultat["message"];
-        } else {
-            $erreur = $resultat["message"];
+        $localisation_id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
+ 
+        if ($localisation_id) {
+ 
+            $resultat = $controller->supprimer($localisation_id);
+ 
+            if ($resultat["succes"]) {
+                $succes = $resultat["message"];
+            } else {
+                $erreur = $resultat["message"];
+            }
         }
     }
 }
@@ -213,13 +220,18 @@ $localisations = $controller->listerToutes();
                 <td><?= !empty($localisation->getQuartier()) ? htmlspecialchars($localisation->getQuartier()) : "—" ?></td>
  
                 <td>
-                  <a
-                    href="localisations.php?action=supprimer&id=<?= $localisation->getId() ?>"
-                    class="action-supprimer"
-                    onclick="return confirm('Supprimer définitivement cette localisation ?');"
-                  >
-                    Supprimer
-                  </a>
+                  <form method="POST" action="localisations.php" style="display: inline;">
+                    <?= Csrf::champCache() ?>
+                    <input type="hidden" name="action" value="supprimer">
+                    <input type="hidden" name="id" value="<?= $localisation->getId() ?>">
+                    <button
+                      type="submit"
+                      class="bouton-texte action-supprimer"
+                      onclick="return confirm('Supprimer définitivement cette localisation ?');"
+                    >
+                      Supprimer
+                    </button>
+                  </form>
                 </td>
  
               </tr>

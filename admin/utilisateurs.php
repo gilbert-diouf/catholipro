@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
  
 require_once "../app/Controllers/UtilisateurController.php";
+require_once "../app/Security/Csrf.php";
  
  
 /*
@@ -212,23 +213,31 @@ $total_utilisateurs = $controller->compterTous();
  
                   <?php elseif ($utilisateur->getStatut() === "actif"): ?>
  
-                    <a
-                      href="basculer-statut.php?id=<?= $utilisateur->getId() ?>"
-                      class="action-suspendre"
-                      onclick="return confirm('Suspendre ce compte ?');"
-                    >
-                      Suspendre
-                    </a>
+                    <form method="POST" action="basculer-statut.php">
+                      <?= Csrf::champCache() ?>
+                      <input type="hidden" name="id" value="<?= $utilisateur->getId() ?>">
+                      <button
+                        type="submit"
+                        class="bouton-texte action-suspendre"
+                        onclick="return confirm('Suspendre ce compte ?');"
+                      >
+                        Suspendre
+                      </button>
+                    </form>
  
                   <?php else: ?>
  
-                    <a
-                      href="basculer-statut.php?id=<?= $utilisateur->getId() ?>"
-                      class="action-activer"
-                      onclick="return confirm('Réactiver ce compte ?');"
-                    >
-                      Activer
-                    </a>
+                    <form method="POST" action="basculer-statut.php">
+                      <?= Csrf::champCache() ?>
+                      <input type="hidden" name="id" value="<?= $utilisateur->getId() ?>">
+                      <button
+                        type="submit"
+                        class="bouton-texte action-activer"
+                        onclick="return confirm('Réactiver ce compte ?');"
+                      >
+                        Activer
+                      </button>
+                    </form>
  
                   <?php endif; ?>
  
@@ -251,4 +260,3 @@ $total_utilisateurs = $controller->compterTous();
  
 </body>
 </html>
- 
